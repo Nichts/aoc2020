@@ -1,7 +1,23 @@
+use std::fs;
+use std::str::FromStr;
+use std::fmt::Debug;
+
+pub fn load_data<F: FromStr>(file: &str) -> Vec<F>
+    where F::Err: Debug {
+    let data = fs::read_to_string(file).unwrap();
+    data.split("\n").filter(|l| -> bool { l.len() > 0 }).map(FromStr::from_str).collect::<Result<Vec<F>, _>>().unwrap()
+}
+
+
 #[cfg(test)]
 mod tests {
+    use crate::load_data;
+
     #[test]
     fn it_works() {
-        assert_eq!(2 + 2, 4);
+        let data: Vec<String> = load_data("../data/day_01.txt");
+        assert_eq!(data[3], "1791");
+        let data: Vec<i32> = load_data("../data/day_01.txt");
+        assert_eq!(data[3], 1791)
     }
 }
