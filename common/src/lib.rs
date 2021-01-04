@@ -7,8 +7,7 @@ where
     F::Err: Debug,
 {
     let data = fs::read_to_string(file).unwrap();
-    data.split("\n")
-        .filter(|l| -> bool { l.len() > 0 })
+    data.lines()
         .map(FromStr::from_str)
         .collect::<Result<Vec<F>, _>>()
         .unwrap()

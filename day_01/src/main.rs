@@ -13,7 +13,8 @@ fn main() -> Result<()> {
 }
 
 fn find_combination(data: &Vec<u32>, n: usize) -> Result<Vec<u32>> {
-    data.into_iter().cloned()
+    data.into_iter()
+        .cloned()
         .combinations(n)
         .find(|e| e.into_iter().fold(0, |a, &b| -> u32 { a + b }) == 2020)
         .ok_or_else(|| anyhow!("Value not found"))
