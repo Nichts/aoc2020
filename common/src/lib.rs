@@ -1,13 +1,18 @@
+use std::fmt::Debug;
 use std::fs;
 use std::str::FromStr;
-use std::fmt::Debug;
 
 pub fn load_data<F: FromStr>(file: &str) -> Vec<F>
-    where F::Err: Debug {
+where
+    F::Err: Debug,
+{
     let data = fs::read_to_string(file).unwrap();
-    data.split("\n").filter(|l| -> bool { l.len() > 0 }).map(FromStr::from_str).collect::<Result<Vec<F>, _>>().unwrap()
+    data.split("\n")
+        .filter(|l| -> bool { l.len() > 0 })
+        .map(FromStr::from_str)
+        .collect::<Result<Vec<F>, _>>()
+        .unwrap()
 }
-
 
 #[cfg(test)]
 mod tests {

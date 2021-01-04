@@ -1,27 +1,20 @@
+use anyhow::{anyhow, Result};
 use common::load_data;
-use anyhow::{Result, anyhow};
+use itertools::Itertools;
 
 fn main() -> Result<()> {
-    let mut data: Vec<i32> = load_data("data/day_01.txt");
+    let mut data: Vec<u32> = load_data("data/day_01.txt");
     data.sort();
-    let (a, b) = find_pair(data)?;
-    println!("Result: {}", a * b);
+    let res = find_combination(&data, 2)?;
+    println!("Result: {}", res.into_iter().product::<u32>());
+    let res = find_combination(&data, 3)?;
+    println!("Result: {}", res.into_iter().product::<u32>());
     Ok(())
 }
 
-fn find_pair(data: Vec<i32>) -> Result<(i32, i32)> {
-    let mut i = 0;
-    let mut j = data.len() - 1;
-
-    while i < j {
-        let res = data[i] + data[j];
-        if res == 2020 {
-            return Ok((data[i], data[j]))
-        } else if res > 2020 {
-            j -= 1;
-        } else {
-            i += 1;
-        }
-    };
-    Err(anyhow!("Value not found"))
+fn find_combination(data: &Vec<u32>, n: usize) -> Result<Vec<u32>> {
+    data.into_iter().cloned()
+        .combinations(n)
+        .find(|e| e.into_iter().fold(0, |a, &b| -> u32 { a + b }) == 2020)
+        .ok_or_else(|| anyhow!("Value not found"))
 }
