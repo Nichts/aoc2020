@@ -13,6 +13,14 @@ where
         .unwrap()
 }
 
+pub fn load_data_full<F: FromStr>(file: &str) -> F
+where
+    F::Err: Debug,
+{
+    let data = fs::read_to_string(file).unwrap();
+    FromStr::from_str(&data).unwrap()
+}
+
 #[cfg(test)]
 mod tests {
     use crate::load_data;
