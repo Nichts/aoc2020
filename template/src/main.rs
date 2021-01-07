@@ -1,7 +1,9 @@
+use common::load_data;
+
 fn main() {
-    let input: String = load_data("data/day_0.txt");
-    println!("Day  Part 1: {}", part_1(&input));
-    println!("Day  Part 2: {}", part_2(&input));
+    // let input: String = load_data("data/day_0.txt");
+    // println!("Day  Part 1: {}", part_1(&input));
+    // println!("Day  Part 2: {}", part_2(&input));
 }
 
 fn part_1(_: &str) -> u32 {
