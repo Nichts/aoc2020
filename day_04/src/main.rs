@@ -1,7 +1,6 @@
-use common::load_data_full;
+use common::{load_data_full, Blocks};
 use nom::bytes::complete::tag;
 use nom::character::complete::multispace0;
-use nom::combinator::map_parser;
 use nom::error::{ErrorKind, ParseError};
 use nom::multi::fold_many1;
 use nom::sequence::{separated_pair, terminated};
@@ -139,17 +138,6 @@ fn key_value(input: &str) -> IResult<&str, Entry> {
         .map(|(rest, (key, value))| (rest, Entry { key, value }))
 }
 
-fn non_empty_line(input: &str) -> IResult<&str, &str> {
-    match input.find("\n\n") {
-        Some(idx) => Ok((&input[idx + 2..], &input[..idx])),
-        None => Ok(("", input)),
-    }
-}
-
-fn batch(input: &str) -> IResult<&str, Vec<Entry>> {
-    map_parser(non_empty_line, |batch| password_batch(batch))(input)
-}
-
 pub fn allowed_chars<T, E: ParseError<T>>(input: T) -> IResult<T, T, E>
 where
     T: InputTakeAtPosition,
@@ -173,13 +161,6 @@ fn password_batch(input: &str) -> IResult<&str, Vec<Entry>> {
             acc
         },
     )(input)
-}
-
-fn password_maps(input: &str) -> IResult<&str, Vec<Vec<Entry>>> {
-    fold_many1(batch, Vec::new(), |mut acc, item| {
-        acc.push(item);
-        acc
-    })(input)
 }
 
 #[derive(Debug)]
@@ -212,11 +193,7 @@ impl<'a> Password<'a> {
 }
 
 fn get_passwords(input: &str) -> Vec<Password> {
-    let (rem, passwords) = password_maps(input).unwrap();
-    assert_eq!(rem, "");
-
-    passwords
-        .into_iter()
+    input.blocks().map(|block| password_batch(block).unwrap().1)
         .map(|entries| Password::new(entries))
         .collect()
 }
