@@ -193,7 +193,9 @@ impl<'a> Password<'a> {
 }
 
 fn get_passwords(input: &str) -> Vec<Password> {
-    input.blocks().map(|block| password_batch(block).unwrap().1)
+    input
+        .blocks()
+        .map(|block| password_batch(block).unwrap().1)
         .map(|entries| Password::new(entries))
         .collect()
 }

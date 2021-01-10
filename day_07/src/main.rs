@@ -1,8 +1,8 @@
+use anyhow::{anyhow, Result};
 use common::load_data_full;
 use lazy_static::lazy_static;
-use regex::{Regex, Captures};
-use anyhow::{Result, anyhow};
-use std::collections::{HashSet, HashMap};
+use regex::{Captures, Regex};
+use std::collections::{HashMap, HashSet};
 
 fn main() {
     let input: String = load_data_full("data/day_07.txt");
@@ -29,10 +29,18 @@ fn parse_rule(input: &str) -> Result<(&str, Vec<(usize, &str)>)> {
     if contents == "no other bags" {
         return Ok((color, vec![]));
     };
-    let contents: Result<Vec<_>> = contents.split(", ").map(|desc| {
-        let desc = CONTENT.captures(desc).ok_or(anyhow!("Invalid description"))?;
-        Ok((desc.get(1).unwrap().as_str().parse().unwrap(), parse_color(desc.get(2).unwrap().as_str())?))
-    }).collect();
+    let contents: Result<Vec<_>> = contents
+        .split(", ")
+        .map(|desc| {
+            let desc = CONTENT
+                .captures(desc)
+                .ok_or(anyhow!("Invalid description"))?;
+            Ok((
+                desc.get(1).unwrap().as_str().parse().unwrap(),
+                parse_color(desc.get(2).unwrap().as_str())?,
+            ))
+        })
+        .collect();
     Ok((color, contents?))
 }
 
@@ -47,14 +55,19 @@ fn part_1(input: &str) -> usize {
 
     loop {
         let len_before = valid.len();
-        parsed = parsed.into_iter().filter(|(bag, contents)| {
-            if contents.into_iter().any(|&(_, color)| valid.contains(color)) {
-                valid.insert(*bag);
-                return false;
-            };
-            true
-        }).collect();
-
+        parsed = parsed
+            .into_iter()
+            .filter(|(bag, contents)| {
+                if contents
+                    .into_iter()
+                    .any(|&(_, color)| valid.contains(color))
+                {
+                    valid.insert(*bag);
+                    return false;
+                };
+                true
+            })
+            .collect();
 
         if len_before == valid.len() {
             break;
@@ -66,9 +79,9 @@ fn part_1(input: &str) -> usize {
 
 fn count_recursive(color: &str, rules: &HashMap<&str, Vec<(usize, &str)>>) -> Result<usize> {
     let rule = rules.get(color).ok_or(anyhow!("Rule does not exist"))?;
-    rule.into_iter().map(|&(count, name)| {
-        Ok(count + count * count_recursive(name, rules)?)
-    }).sum()
+    rule.into_iter()
+        .map(|&(count, name)| Ok(count + count * count_recursive(name, rules)?))
+        .sum()
 }
 
 fn part_2(input: &str) -> usize {
@@ -109,18 +122,28 @@ dark violet bags contain no other bags.";
     #[test]
     fn test_parsing() {
         let input = get_input();
-        let parsed = input.lines().map(|line| parse_rule(line)).collect::<Result<Vec<_>>>().unwrap();
-        assert_eq!(parsed, vec![
-            ("light red", vec![(1, "bright white"), (2, "muted yellow")]),
-            ("dark orange", vec![(3, "bright white"), (4, "muted yellow")]),
-            ("bright white", vec![(1, "shiny gold")]),
-            ("muted yellow", vec![(2, "shiny gold"), (9, "faded blue")]),
-            ("shiny gold", vec![(1, "dark olive"), (2, "vibrant plum")]),
-            ("dark olive", vec![(3, "faded blue"), (4, "dotted black")]),
-            ("vibrant plum", vec![(5, "faded blue"), (6, "dotted black")]),
-            ("faded blue", vec![]),
-            ("dotted black", vec![]),
-        ])
+        let parsed = input
+            .lines()
+            .map(|line| parse_rule(line))
+            .collect::<Result<Vec<_>>>()
+            .unwrap();
+        assert_eq!(
+            parsed,
+            vec![
+                ("light red", vec![(1, "bright white"), (2, "muted yellow")]),
+                (
+                    "dark orange",
+                    vec![(3, "bright white"), (4, "muted yellow")]
+                ),
+                ("bright white", vec![(1, "shiny gold")]),
+                ("muted yellow", vec![(2, "shiny gold"), (9, "faded blue")]),
+                ("shiny gold", vec![(1, "dark olive"), (2, "vibrant plum")]),
+                ("dark olive", vec![(3, "faded blue"), (4, "dotted black")]),
+                ("vibrant plum", vec![(5, "faded blue"), (6, "dotted black")]),
+                ("faded blue", vec![]),
+                ("dotted black", vec![]),
+            ]
+        )
     }
 
     #[test]
@@ -132,8 +155,14 @@ dark violet bags contain no other bags.";
     #[test]
     fn test_part_2() {
         let input = get_input();
-        assert_eq!(count_recursive("shiny gold", &parse_rules(&input).unwrap()).unwrap(), 32);
+        assert_eq!(
+            count_recursive("shiny gold", &parse_rules(&input).unwrap()).unwrap(),
+            32
+        );
         let input_2 = get_input_2();
-        assert_eq!(count_recursive("shiny gold", &parse_rules(&input_2).unwrap()).unwrap(), 126);
+        assert_eq!(
+            count_recursive("shiny gold", &parse_rules(&input_2).unwrap()).unwrap(),
+            126
+        );
     }
 }

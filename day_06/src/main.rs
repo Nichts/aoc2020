@@ -1,4 +1,4 @@
-use common::{Blocks, load_data_full};
+use common::{load_data_full, Blocks};
 use std::collections::HashSet;
 use std::iter::FromIterator;
 
@@ -8,28 +8,37 @@ fn main() {
     println!("Day 06 Part 2: {}", part_2(&input));
 }
 
-
 fn part_1(input: &str) -> usize {
-    input.blocks().map(|block| block.chars().fold(HashSet::new(), |mut acc, c| {
-        if c.is_alphabetic() {
-            acc.insert(c);
-        }
-        acc
-    })).map(|set| set.len()).sum()
+    input
+        .blocks()
+        .map(|block| {
+            block.chars().fold(HashSet::new(), |mut acc, c| {
+                if c.is_alphabetic() {
+                    acc.insert(c);
+                }
+                acc
+            })
+        })
+        .map(|set| set.len())
+        .sum()
 }
 
 fn part_2(input: &str) -> usize {
-    input.blocks().map(|block| {
-        let mut lines = block.lines();
-        let mut all = HashSet::new();
-        if let Some(line) = lines.next() {
-            all.extend(line.chars())
-        };
-        lines.fold(all, |acc, line| {
-            let chars = HashSet::from_iter(line.chars());
-            acc.intersection(&chars).cloned().collect()
+    input
+        .blocks()
+        .map(|block| {
+            let mut lines = block.lines();
+            let mut all = HashSet::new();
+            if let Some(line) = lines.next() {
+                all.extend(line.chars())
+            };
+            lines.fold(all, |acc, line| {
+                let chars = HashSet::from_iter(line.chars());
+                acc.intersection(&chars).cloned().collect()
+            })
         })
-    }).map(|set| set.len()).sum()
+        .map(|set| set.len())
+        .sum()
 }
 
 #[cfg(test)]
